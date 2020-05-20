@@ -45,11 +45,11 @@ class Slider implements ISlider {
   }
 
   private load() {
-    this.$el.src = this.url;
     this.$el.onload = () => {
       this.resizeImg();
       this.$el.onload = null;
     };
+    this.$el.src = this.url;
   }
 
   resize(size: ISize) {

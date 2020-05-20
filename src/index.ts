@@ -74,7 +74,7 @@ class Gallery {
       const touch = ev.changedTouches[0];
       x = touch.clientX;
     }
-    this.imgOffset = x - this.moveStartX
+    this.imgOffset = x - this.moveStartX;
     this.onSlideMove();
   }
 
@@ -100,6 +100,7 @@ class Gallery {
         } else if (targetOffset < 0) {
           this.next();
         }
+        this.imgOffset = 0;
       }
     }, 50);
   }
