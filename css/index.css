@@ -1,0 +1,17 @@
+.duck-gallery {
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: #000;
+}
+.duck-gallery.fixed {
+  position: fixed;
+}
+.duck-gallery.absolute {
+  position: absolute;
+}
+
+.duck-gallery--slider {
+  position: absolute;
+}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, shrink-to-fit=no,user-scalable=0">
+  <title>duckGallery</title>
+  <link rel="stylesheet" href="../css/index.css" />
+</head>
+<body>
+  <h1>Duck Gallery</h1>
+  <div>
+    <button id="show-btn">show gallery</button>
+  </div>
+  <script src="../dist/main.js"></script>
+  <script>
+    let gallery;
+    const showGallery = function() {
+      gallery = duckGallery({
+        images: [
+          'http://img13.360buyimg.com/n1/jfs/t1/55490/25/5385/200501/5d3048c6E1d6d6a0c/fd4bdd2025c0f425.jpg',
+          'https://img30.360buyimg.com/sku/jfs/t1/101266/35/4859/536468/5de9e17aE2f99c3d6/5eaeb36b6f24f654.jpg',
+          'https://yanxuan-item.nosdn.127.net/3480e3fa68b810f23afb43f6bf2fe45b.png',
+          'https://img30.360buyimg.com/sku/jfs/t1/18343/11/4947/141064/5c36f2b8E656e1d63/bf1f0708d6779f35.jpg'
+        ],
+        index: 0,
+      });
+    };
+    document.getElementById('show-btn').addEventListener('click', showGallery);
+    showGallery();
+  </script>
+</body>
+</html>
