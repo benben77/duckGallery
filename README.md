@@ -19,3 +19,10 @@ Build:
 ```
 npm run build
 ```
+
+## TODO
+
+- lisence
+- github pages
+- publish to npm / github packages
+- test

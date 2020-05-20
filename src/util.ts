@@ -14,7 +14,17 @@ interface ISize {
   height: number;
 }
 
+const isTouchDevice = function(): boolean {
+  try {  
+    document.createEvent('TouchEvent');  
+    return true;  
+  } catch (e) {  
+    return false;  
+  }
+}
+
 export {
   debounce,
   ISize,
+  isTouchDevice,
 };
