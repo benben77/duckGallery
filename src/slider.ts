@@ -25,7 +25,6 @@ class Slider implements ISlider {
 
   init(url: string, parent: HTMLElement, offset: number) {
     this.url = url;
-    this.offset = offset;
     this.size = null;
 
     if (!this.$el) {
@@ -41,13 +40,24 @@ class Slider implements ISlider {
     this.$el.style.opacity = '0';
     parent.appendChild(this.$wrapper);
 
+    this.setOffset(offset);
     this.load();
   }
 
   setOffset(offset: number) {
     this.offset = offset;
     this.imgOffset = 0;
-    this.resizeImg();
+    this.resizeWrapper();
+  }
+
+  setImgOffset(x: number) {
+    this.imgOffset = x;
+    this.resizeWrapper();
+  }
+
+  resizeWrapper() {
+    if (!this.size) return;
+    this.$wrapper.style.left = `${ this.offset * this.size.width + this.imgOffset }px`;
   }
 
   private load() {
@@ -60,6 +70,7 @@ class Slider implements ISlider {
 
   resize(size: ISize) {
     this.size = size;
+    this.resizeWrapper();
     this.resizeImg();
   }
 
@@ -82,16 +93,10 @@ class Slider implements ISlider {
   }
 
   private renderImg() {
-    this.$wrapper.style.left = `${ this.offset * this.size.width + this.imgOffset }px`;
     this.$el.style.left = `${this.left}px`;
     this.$el.style.top = `${this.top}px`;
     this.$el.style.width = `${this.width}px`;
     this.$el.style.height = `${this.height}px`;
-  }
-
-  setImgOffset(x: number) {
-    this.imgOffset = x;
-    this.renderImg();
   }
 
   destroy() {
