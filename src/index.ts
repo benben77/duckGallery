@@ -80,6 +80,12 @@ class Gallery {
 
   private mouseUp() {
     this.isMoving = false;
+    if(Math.abs(this.imgOffset) < 10) {
+      this.imgOffset = 0;
+      this.onSlideMove();
+      return;
+    }
+
     let targetOffset = 0;
     if(Math.abs(this.imgOffset) > this.size.width / 2) {
       targetOffset = this.imgOffset > 0 ? this.size.width : -this.size.width;

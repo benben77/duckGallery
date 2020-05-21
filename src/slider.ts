@@ -13,13 +13,14 @@ class Slider implements ISlider {
   private url: string;
   private size?: ISize;
   private offset: number = 0;
-  private ratio: number = 1;
+  private ratio: number = -1;
   private left = 0;
   private top = 0;
   private width = 0;
   private height = 0;
   private imgOffset = 0;
 
+  private $wrapper: HTMLElement;
   private $el: HTMLImageElement;
 
   init(url: string, parent: HTMLElement, offset: number) {
@@ -29,11 +30,16 @@ class Slider implements ISlider {
 
     if (!this.$el) {
       const $el = document.createElement('img');
-      $el.className = 'duck-gallery--slider';
+      $el.className = 'duck-gallery--slider-img';
       this.$el = $el;
+
+      const $wrapper = document.createElement('div');
+      $wrapper.className = 'duck-gallery--slider';
+      $wrapper.appendChild($el);
+      this.$wrapper = $wrapper;
     }
     this.$el.style.opacity = '0';
-    parent.appendChild(this.$el);
+    parent.appendChild(this.$wrapper);
 
     this.load();
   }
@@ -61,9 +67,9 @@ class Slider implements ISlider {
     if (!this.$el.complete || !this.size) return;
     const w = this.size.width - 2 * padding;
     const h = this.size.height - 2 * padding;
-    const ratio = Math.min(w / this.$el.width , h / this.$el.height);
-    const imgW = ratio * this.$el.width;
-    const imgH = ratio * this.$el.height;
+    const ratio = Math.min(w / this.$el.naturalWidth , h / this.$el.naturalHeight, 1);
+    const imgW = ratio * this.$el.naturalWidth;
+    const imgH = ratio * this.$el.naturalHeight;
 
     this.ratio = ratio;
     this.left = (this.size.width - imgW) / 2 + this.offset * this.size.width;
@@ -89,7 +95,7 @@ class Slider implements ISlider {
 
   destroy() {
     sliderPool.push(this);
-    this.$el.parentElement.removeChild(this.$el);
+    this.$wrapper.parentElement.removeChild(this.$wrapper);
   }
 };
 
