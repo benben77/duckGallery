@@ -34,8 +34,8 @@ class Gallery {
     const positionClsStr = parent ? 'absolute' : 'fixed';
     $el.className = `duck-gallery ${positionClsStr}`;
     this.$root.appendChild($el);
-    $el.addEventListener('click', (ev) => {
-      if (ev.target === this.$el) {
+    $el.addEventListener('click', ({ target }) => {
+      if (target instanceof HTMLElement && target.className === 'duck-gallery--slider') {
         this.destroy();
       }
     });

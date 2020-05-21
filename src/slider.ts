@@ -72,7 +72,7 @@ class Slider implements ISlider {
     const imgH = ratio * this.$el.naturalHeight;
 
     this.ratio = ratio;
-    this.left = (this.size.width - imgW) / 2 + this.offset * this.size.width;
+    this.left = (this.size.width - imgW) / 2;
     this.top = (this.size.height - imgH) / 2;
     this.width = imgW;
     this.height = imgH;
@@ -82,7 +82,8 @@ class Slider implements ISlider {
   }
 
   private renderImg() {
-    this.$el.style.left = `${this.left + this.imgOffset}px`;
+    this.$wrapper.style.left = `${ this.offset * this.size.width + this.imgOffset }px`;
+    this.$el.style.left = `${this.left}px`;
     this.$el.style.top = `${this.top}px`;
     this.$el.style.width = `${this.width}px`;
     this.$el.style.height = `${this.height}px`;
