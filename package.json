@@ -2,7 +2,7 @@
   "name": "duckgallery",
   "version": "1.0.0",
   "description": "js image gallery",
-  "main": "index.js",
+  "main": "src/index.ts",
   "scripts": {
     "build": "rollup -c",
     "demo": "npx http-server"
