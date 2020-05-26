@@ -117,8 +117,8 @@ class Slider implements ISlider {
     if (this.ratio === -1) return;
     let targetScale = 1;
     let originScale = this.scale;
-    if (this.scale === 1 || this.ratio * this.scale < 1) {
-      targetScale = this.scale * 2;
+    if (this.scale === 1) {
+      targetScale = Math.max(2, 1 / this.ratio);
     }
 
     // TODO: 动画

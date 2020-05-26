@@ -230,7 +230,7 @@ class Gallery implements IGallery {
   }
 
   /**
-   * TODO:
+   * TODO:git c
    * 上划关闭
    * 手势放大
    * 双击放大的动画
