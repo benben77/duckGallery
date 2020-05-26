@@ -34,9 +34,21 @@ class Gallery {
     const positionClsStr = parent ? 'absolute' : 'fixed';
     $el.className = `duck-gallery ${positionClsStr}`;
     this.$root.appendChild($el);
-    $el.addEventListener('click', ({ target }) => {
+    let dbClickCount = 0;
+    $el.addEventListener('click', (ev) => {
+      const { target } = ev;
       if (target instanceof HTMLElement && target.className === 'duck-gallery--slider') {
         this.destroy();
+      } else {
+        dbClickCount += 1;
+        if (dbClickCount === 1) {
+          setTimeout(() => {
+            if (dbClickCount >= 2) {
+              this.dbClick(ev);
+            }
+            dbClickCount = 0;
+          }, 500);
+        }
       }
     });
     this.$el = $el;
@@ -49,9 +61,20 @@ class Gallery {
     this.onMouseDown = this.mouseDown.bind(this);
     this.onMouseMove = this.mouseMove.bind(this);
     this.onMouseUp = this.mouseUp.bind(this);
-    window.addEventListener(this.isTouch ? 'touchstart' : 'mousedown', this.onMouseDown);
-    window.addEventListener(this.isTouch ? 'touchmove' : 'mousemove', this.onMouseMove);
-    window.addEventListener(this.isTouch ? 'touchend' : 'mouseup', this.onMouseUp);
+    if (this.isTouch) {
+      window.addEventListener('touchstart', this.onMouseDown);
+      window.addEventListener('touchmove', this.onMouseMove);
+      window.addEventListener('touchend', this.onMouseUp);
+    } else {
+      window.addEventListener('mousedown', this.onMouseDown);
+      window.addEventListener('mousemove', this.onMouseMove);
+      window.addEventListener('mouseup', this.onMouseUp);
+    }
+  }
+
+  private dbClick(ev: MouseEvent) {
+    const { clientX, clientY } = ev;
+    this.sliders[1].dbClick(clientX, clientY);
   }
 
   private mouseDown(ev: MouseEvent | TouchEvent) {
@@ -179,9 +202,15 @@ class Gallery {
   destroy() {
     if (this.isInAnimation) return;
 
-    window.removeEventListener(this.isTouch ? 'touchstart' : 'mousedown', this.onMouseDown);
-    window.removeEventListener(this.isTouch ? 'touchmove' : 'mousemove', this.onMouseMove);
-    window.removeEventListener(this.isTouch ? 'touchend' : 'mouseup', this.onMouseUp);
+    if (this.isTouch) {
+      window.removeEventListener('touchstart', this.onMouseDown);
+      window.removeEventListener('touchmove', this.onMouseMove);
+      window.removeEventListener('touchend', this.onMouseUp);
+    } else {
+      window.removeEventListener('mousedown', this.onMouseDown);
+      window.removeEventListener('mousemove', this.onMouseMove);
+      window.removeEventListener('mouseup', this.onMouseUp);
+    };
     window.removeEventListener('resize', this.resize);
 
     this.$root.removeChild(this.$el);
@@ -192,8 +221,8 @@ class Gallery {
 
   /**
    * TODO:
-   * 双击放大
    * 手势放大
+   * 双指拖动
    * 事件：currentIndex改变
    */
 }

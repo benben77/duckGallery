@@ -6,6 +6,7 @@ interface ISlider {
   resize(size: ISize): void;
   setImgOffset(x: number) : void;
   setOffset(offset: number): void;
+  dbClick(x: number, y: number): void;
   destroy(): void;
 }
 
@@ -14,6 +15,7 @@ class Slider implements ISlider {
   private size?: ISize;
   private offset: number = 0;
   private ratio: number = -1;
+  private scale: number = -1;
   private left = 0;
   private top = 0;
   private width = 0;
@@ -48,6 +50,7 @@ class Slider implements ISlider {
     this.offset = offset;
     this.imgOffset = 0;
     this.resizeWrapper();
+    if (this.ratio !== -1) return; this.resizeImg();
   }
 
   setImgOffset(x: number) {
@@ -79,17 +82,35 @@ class Slider implements ISlider {
     const w = this.size.width - 2 * padding;
     const h = this.size.height - 2 * padding;
     const ratio = Math.min(w / this.$el.naturalWidth , h / this.$el.naturalHeight, 1);
-    const imgW = ratio * this.$el.naturalWidth;
-    const imgH = ratio * this.$el.naturalHeight;
 
+    
     this.ratio = ratio;
-    this.left = (this.size.width - imgW) / 2;
-    this.top = (this.size.height - imgH) / 2;
-    this.width = imgW;
-    this.height = imgH;
-    this.renderImg();
+    this.resizeImgByScale(1, null, null);
 
     this.$el.style.opacity = '1';
+  }
+
+  private resizeImgByScale(scale: number, x: number | null, y: number | null) {
+    const originScale = this.scale;
+    this.scale = scale;
+    const ratio = this.ratio * scale;
+
+    const { naturalWidth, naturalHeight } = this.$el;
+    const imgW = ratio * naturalWidth;
+    const imgH = ratio * naturalHeight;
+    if (x !== null && y != null) {
+      // keep the clicked point at the same place after scale
+      this.left = x - (x - this.left) * scale / originScale;
+      this.top = y - (y - this.top) * scale / originScale;
+    } else {
+      this.left = this.size.width / 2 - imgW / 2;
+      this.top = this.size.height / 2 - imgH / 2;
+    }
+    
+    this.width = imgW;
+    this.height = imgH;
+
+    this.renderImg();
   }
 
   private renderImg() {
@@ -97,6 +118,15 @@ class Slider implements ISlider {
     this.$el.style.top = `${this.top}px`;
     this.$el.style.width = `${this.width}px`;
     this.$el.style.height = `${this.height}px`;
+  }
+
+  dbClick(x: number, y: number) {
+    if (this.ratio === -1) return;
+    if (this.scale === 1 || this.ratio * this.scale < 1) {
+      this.resizeImgByScale(this.scale * 2, x, y);
+    } else {
+      this.resizeImgByScale(1, null, null);
+    }
   }
 
   destroy() {
