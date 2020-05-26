@@ -1,14 +1,6 @@
-import { ISize } from "./util";
+import { ISize, ISlider, IGallery } from "./util";
 
 const padding = 24;
-
-interface ISlider {
-  resize(size: ISize): void;
-  setImgOffset(x: number) : void;
-  setOffset(offset: number): void;
-  dbClick(x: number, y: number): void;
-  destroy(): void;
-}
 
 class Slider implements ISlider {
   private url: string;
@@ -41,7 +33,8 @@ class Slider implements ISlider {
     }
     this.$el.style.opacity = '0';
     parent.appendChild(this.$wrapper);
-
+    
+    if (offset === 0) window['slide'] = this;
     this.setOffset(offset);
     this.load();
   }
@@ -50,7 +43,7 @@ class Slider implements ISlider {
     this.offset = offset;
     this.imgOffset = 0;
     this.resizeWrapper();
-    if (this.ratio !== -1) return; this.resizeImg();
+    if (this.ratio !== -1) this.resizeImg();
   }
 
   setImgOffset(x: number) {
@@ -120,13 +113,31 @@ class Slider implements ISlider {
     this.$el.style.height = `${this.height}px`;
   }
 
-  dbClick(x: number, y: number) {
+  dbClick(x: number, y: number, gallery: IGallery) {
     if (this.ratio === -1) return;
+    let targetScale = 1;
+    let originScale = this.scale;
     if (this.scale === 1 || this.ratio * this.scale < 1) {
-      this.resizeImgByScale(this.scale * 2, x, y);
-    } else {
-      this.resizeImgByScale(1, null, null);
+      targetScale = this.scale * 2;
     }
+
+    // TODO: 动画
+    if (targetScale === 1) {
+      this.resizeImgByScale(1, null, null);
+    } else {
+      this.resizeImgByScale(targetScale, x, y);
+    }
+  }
+
+  get isScaled() {
+    return this.scale !== 1;
+  }
+
+  move(x: number, y: number) {
+    // TODO: calc move bound
+    this.left += x;
+    this.top += y;
+    this.renderImg();
   }
 
   destroy() {

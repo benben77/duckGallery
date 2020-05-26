@@ -1,5 +1,5 @@
-import { debounce, ISize, isTouchDevice } from "./util";
-import { sliderFactory, ISlider } from "./slider";
+import { debounce, isTouchDevice, ISize, ISlider, IGallery } from "./util";
+import { sliderFactory } from "./slider";
 
 interface IGalleryOpts {
   images: string[],
@@ -7,7 +7,7 @@ interface IGalleryOpts {
   parent?: HTMLElement;
 }
 
-class Gallery {
+class Gallery implements IGallery {
   private images: string[];
   private currentIndex: number;
   private size: ISize;
@@ -20,9 +20,10 @@ class Gallery {
   private onMouseDown: (ev: MouseEvent | TouchEvent) => void;
   private onMouseMove: (ev: MouseEvent | TouchEvent) => void;
   private onMouseUp: (ev: MouseEvent | TouchEvent) => void;
-  private isMoving = false;
+  private isMoving = 0; // 1, 2
   private moveStartX = 0;
-  private isInAnimation = false;
+  private moveStartY = 0;
+  public isInAnimation = false;
   private imgOffset = 0;
 
   constructor({ images, index, parent }: IGalleryOpts) {
@@ -34,21 +35,12 @@ class Gallery {
     const positionClsStr = parent ? 'absolute' : 'fixed';
     $el.className = `duck-gallery ${positionClsStr}`;
     this.$root.appendChild($el);
-    let dbClickCount = 0;
     $el.addEventListener('click', (ev) => {
       const { target } = ev;
       if (target instanceof HTMLElement && target.className === 'duck-gallery--slider') {
         this.destroy();
       } else {
-        dbClickCount += 1;
-        if (dbClickCount === 1) {
-          setTimeout(() => {
-            if (dbClickCount >= 2) {
-              this.dbClick(ev);
-            }
-            dbClickCount = 0;
-          }, 500);
-        }
+        this.dbClick(ev);
       }
     });
     this.$el = $el;
@@ -62,7 +54,7 @@ class Gallery {
     this.onMouseMove = this.mouseMove.bind(this);
     this.onMouseUp = this.mouseUp.bind(this);
     if (this.isTouch) {
-      window.addEventListener('touchstart', this.onMouseDown);
+      window.addEventListener('touchstart', this.onMouseDown, { passive: false });
       window.addEventListener('touchmove', this.onMouseMove);
       window.addEventListener('touchend', this.onMouseUp);
     } else {
@@ -72,37 +64,55 @@ class Gallery {
     }
   }
 
+  private get currentSlide() {
+    return this.sliders[1];
+  }
+
   private dbClick(ev: MouseEvent) {
+    if (this.isInAnimation) return;
     const { clientX, clientY } = ev;
-    this.sliders[1].dbClick(clientX, clientY);
+    this.currentSlide.dbClick(clientX, clientY, this);
   }
 
   private mouseDown(ev: MouseEvent | TouchEvent) {
     if (this.isInAnimation) return;
-    this.isMoving = true;
+    this.isMoving = this.currentSlide.isScaled ? 2 : 1;
     if (ev instanceof MouseEvent) {
       this.moveStartX = ev.clientX;
+      this.moveStartY = ev.clientY;
     } else {
       const touch = ev.changedTouches[0];
       this.moveStartX = touch.clientX;
+      this.moveStartY = touch.clientY;
     }
   }
 
   private mouseMove(ev: MouseEvent | TouchEvent) {
-    if (!this.isMoving) return;
-    let x = 0;
+    if (this.isMoving === 0) return;
+    let x: number;
+    let y: number;
     if (ev instanceof MouseEvent) {
       x = ev.clientX;
+      y = ev.clientY;
     } else {
       const touch = ev.changedTouches[0];
       x = touch.clientX;
+      y = touch.clientY;
     }
-    this.imgOffset = x - this.moveStartX;
-    this.onSlideMove();
+    if (this.isMoving === 2) {
+      this.currentSlide.move(x - this.moveStartX, y - this.moveStartY);
+      this.moveStartX = x;
+      this.moveStartY = y;
+    } else if (this.isMoving === 1) {
+      this.imgOffset = x - this.moveStartX;
+      this.onSlideMove();
+    }
   }
 
   private mouseUp() {
-    this.isMoving = false;
+    const { isMoving } = this;
+    this.isMoving = 0;
+    if (isMoving !== 1) return;
     if(Math.abs(this.imgOffset) < 10) {
       this.imgOffset = 0;
       this.onSlideMove();
@@ -221,8 +231,9 @@ class Gallery {
 
   /**
    * TODO:
+   * 上划关闭
    * 手势放大
-   * 双指拖动
+   * 双击放大的动画
    * 事件：currentIndex改变
    */
 }
