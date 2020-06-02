@@ -20,7 +20,14 @@ class Gallery implements IGallery {
   private onMouseDown: (ev: MouseEvent | TouchEvent) => void;
   private onMouseMove: (ev: MouseEvent | TouchEvent) => void;
   private onMouseUp: (ev: MouseEvent | TouchEvent) => void;
-  private isMoving = 0; // 1, 2
+  /**
+   * isMoving
+   * 1: small image, slide to prev/next
+   * 2: scaled image, move image
+   */
+  private isMoving = 0;
+  private isMovingToHide = false;
+  private opacity = 1;
   private moveStartX = 0;
   private moveStartY = 0;
   public isInAnimation = false;
@@ -77,6 +84,7 @@ class Gallery implements IGallery {
   private mouseDown(ev: MouseEvent | TouchEvent) {
     if (this.isInAnimation) return;
     this.isMoving = this.currentSlide.isScaled ? 2 : 1;
+    this.isMovingToHide = false;
     if (ev instanceof MouseEvent) {
       this.moveStartX = ev.clientX;
       this.moveStartY = ev.clientY;
@@ -105,15 +113,37 @@ class Gallery implements IGallery {
       this.moveStartY = y;
     } else if (this.isMoving === 1) {
       this.imgOffset = x - this.moveStartX;
-      this.onSlideMove();
+      const movedY = this.moveStartY - y;
+      if (!this.isMovingToHide && Math.abs(this.imgOffset) > 10) {
+        this.onSlideMove();
+      } else {
+        let opacity = 1;
+        if (movedY > 10) {
+          this.isMovingToHide = true;
+          opacity = Math.max(0.4, 1 - (this.moveStartY - y) / this.size.height * 1.8);
+        }
+        if (opacity <= 0.4) {
+          this.destroy();
+          return;
+        }
+        this.setOpacity(opacity);
+      }
     }
+  }
+
+  private setOpacity(opacity: number) {
+    this.opacity = opacity;
+    this.$el.style.opacity = `${opacity}`;
   }
 
   private mouseUp() {
     const { isMoving } = this;
     this.isMoving = 0;
     if (isMoving !== 1) return;
-    if(Math.abs(this.imgOffset) < 10) {
+
+    this.setOpacity(1);
+
+    if(this.isMovingToHide || Math.abs(this.imgOffset) < 10) {
       this.imgOffset = 0;
       this.onSlideMove();
       return;
@@ -230,11 +260,11 @@ class Gallery implements IGallery {
   }
 
   /**
-   * TODO:git c
-   * 上划关闭
-   * 手势放大
+   * TODO:
+   * 缓动动画
    * 双击放大的动画
-   * 事件：currentIndex改变
+   * 手势放大
+   * 事件：currentIndex改变、关闭...
    */
 }
 
